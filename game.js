@@ -14,7 +14,7 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const rand = (a, b) => a + Math.random() * (b - a);
 
-  // --- Assets (simple SVGs stored in /assets) ---
+  // --- Assets ---
   const assets = {
     bg: new Image(),
     pidgey: new Image(),
@@ -32,6 +32,7 @@
   assets.pidgey.onload = onAssetLoad;
   assets.pipe.onload = onAssetLoad;
 
+  // IMPORTANT: sprite sheet is png
   assets.bg.src = "assets/bg.svg";
   assets.pidgey.src = "assets/pidgey_sheet.png";
   assets.pipe.src = "assets/pipe.svg";
@@ -53,10 +54,18 @@
     started: false,
     running: false,
     over: false,
+
     score: 0,
     best: Number(localStorage.getItem("fp_best") || 0),
 
-    anim: { frame: 0, time: 0, fps: 14, frames: 22 },
+    // Sprite animation config for your sheet
+    anim: {
+      frame: 0,
+      time: 0,
+      fpsBase: 14,
+      fps: 14,
+      frames: 22,   // <-- if your sheet isn't 22 frames, change this number
+    },
 
     bird: { x: 140, y: H * 0.45, vy: 0, r: 18, angle: 0 },
 
@@ -70,6 +79,7 @@
     state.started = false;
     state.running = false;
     state.over = false;
+
     state.score = 0;
 
     state.bird.x = 140;
@@ -79,6 +89,10 @@
 
     state.pipes = [];
     state.spawnTimer = 0;
+
+    state.anim.frame = 0;
+    state.anim.time = 0;
+    state.anim.fps = state.anim.fpsBase;
   }
 
   function start() {
@@ -91,10 +105,16 @@
   function flap() {
     if (!state.started) start();
     if (state.over) return;
+
     state.bird.vy = T.flap;
+
+    // tiny "flap burst" so it feels responsive
     state.anim.time = 0;
-    state.anim.time = 18;
-    setTimeout(() => { state.anim.fps = 14; }, 200)
+    state.anim.fps = 18;
+    window.clearTimeout(flap._t);
+    flap._t = window.setTimeout(() => {
+      state.anim.fps = state.anim.fpsBase;
+    }, 200);
   }
 
   function endGame() {
@@ -112,7 +132,6 @@
     const bottomMargin = T.groundH + 130;
 
     const gapY = rand(topMargin + gapSize / 2, H - bottomMargin - gapSize / 2);
-
     state.pipes.push({ x: W + 40, gapY, passed: false });
   }
 
@@ -124,14 +143,15 @@
   }
 
   function update(dt) {
-    if (!state.running) return;
-    // Sprite animation tick
+    // Always animate sprite even on start screen (looks alive)
     state.anim.time += dt;
     const frameDur = 1 / state.anim.fps;
     while (state.anim.time >= frameDur) {
       state.anim.time -= frameDur;
-      state.anim.time = (state.anim.frame + 1) % state.anim.frames;
+      state.anim.frame = (state.anim.frame + 1) % state.anim.frames;
     }
+
+    if (!state.running) return;
 
     const b = state.bird;
 
@@ -164,7 +184,7 @@
       spawnPipe();
     }
 
-    const speed = T.pipeSpeed + Math.min(140, state.score * 3); // mild scaling
+    const speed = T.pipeSpeed + Math.min(140, state.score * 3);
     for (const p of state.pipes) p.x -= speed * dt;
 
     state.pipes = state.pipes.filter(p => p.x + T.pipeW > -60);
@@ -200,7 +220,6 @@
     if (assets.loaded) {
       ctx.drawImage(assets.bg, 0, 0, W, H);
     } else {
-      // fallback background
       ctx.fillStyle = "#8ed7ff";
       ctx.fillRect(0, 0, W, H);
     }
@@ -224,7 +243,6 @@
       const gapTop = p.gapY - gapSize / 2;
       const gapBot = p.gapY + gapSize / 2;
 
-      // Draw pipes with asset if loaded, else draw rectangles
       if (assets.loaded) {
         // top pipe (flipped)
         ctx.save();
@@ -246,23 +264,22 @@
 
   function drawBird() {
     const b = state.bird;
+
     ctx.save();
     ctx.translate(b.x, b.y);
     ctx.rotate(b.angle);
 
     if (assets.loaded) {
-      // Sprite sheet frame draw
+      // Sprite sheet math: frame width = totalWidth / frameCount
       const a = state.anim;
-
-      // Each frame is the sheet width divided by frame count
       const fw = assets.pidgey.width / a.frames;
       const fh = assets.pidgey.height;
 
       const sx = Math.floor(a.frame * fw);
       const sy = 0;
 
-      // Draw size on canvas (tweak to taste)
-      const size = 64;
+      // How big on the canvas?
+      const size = 72; // tweak if you want bigger/smaller
 
       ctx.drawImage(
         assets.pidgey,
@@ -270,7 +287,6 @@
         -size / 2, -size / 2, size, size
       );
     } else {
-      // fallback circle bird
       ctx.fillStyle = "rgba(245,210,130,.98)";
       ctx.beginPath();
       ctx.arc(0, 0, b.r + 2, 0, Math.PI * 2);
