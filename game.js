@@ -78,27 +78,27 @@
     flap: -480,
     maxFall: 980,
 
-    pipeW: 80,
+    pipeW: 85,
     gap: 200,
-    gapHard: 160,
-    spawnEvery: 1.25,
+    gapHard: 155,
+    spawnEvery: 1.22,
 
-    pipeSpeedBase: 200,
-    pipeSpeedStep: 16, // every 5 points
+    pipeSpeedBase: 170,
+    pipeSpeedStep: 9, // every 5 points
 
     groundH: 90,
 
     frames: 22,
     fpsBase: 14,
-    fpsFlapBurst: 22,
+    fpsFlapBurst: 30,
 
     birdSize: 100,
     birdRadius: 26,
 
-    collectibleChancePerPipe: 0.28,
+    collectibleChancePerPipe: 0.22,
 
-    invincibleSec: 5,
-    megaSec: 30,
+    invincibleSec: 6,
+    megaSec: 40,
   };
 
   // ---- Collectibles ----
@@ -106,7 +106,7 @@
     RAZZ: {
       key: "RAZZ",
       title: "Razz Berry",
-      desc: "Removes the next pipe in a poof of smoke and +1 point.",
+      desc: "Removes the next pipe and +1 point.",
       icon: "razz",
       score: 1,
       clearPipes: 1,
@@ -114,7 +114,7 @@
     GOLD_RAZZ: {
       key: "GOLD_RAZZ",
       title: "Golden Razz Berry",
-      desc: "Removes the next 5 pipes in a poof of smoke and +5 points.",
+      desc: "Removes the next 5 pipes and +5 points.",
       icon: "goldRazz",
       score: 5,
       clearPipes: 5,
@@ -122,7 +122,7 @@
     PINAP: {
       key: "PINAP",
       title: "Pinap Berry",
-      desc: "+2 points.",
+      desc: "Gain +2 points.",
       icon: "pinap",
       score: 2,
       clearPipes: 0,
@@ -130,7 +130,7 @@
     SILVER_PINAP: {
       key: "SILVER_PINAP",
       title: "Silver Pinap Berry",
-      desc: "+10 points.",
+      desc: "Gain +10 points.",
       icon: "silverPinap",
       score: 10,
       clearPipes: 0,
@@ -138,7 +138,7 @@
     NANAB: {
       key: "NANAB",
       title: "Nanab Berry",
-      desc: "Invincible for 5 seconds (Pidgey turns transparent + timer).",
+      desc: "Invincible for 6 seconds.",
       icon: "nanab",
       score: 0,
       clearPipes: 0,
@@ -147,10 +147,10 @@
     MEGA_STONE: {
       key: "MEGA_STONE",
       title: "Mega Stone",
-      desc: "IT’S MEGA TIME! 30 seconds of Mega mode: 4× bigger and smash through pipes (timer above).",
+      desc: "Mega Evolve for 40 seconds and smash your way through pipes!",
       icon: "mega",
-      score: 20,
-      clearPipes: 0,
+      score: 30,
+      clearPipes: 1,
       megaSec: T.megaSec,
     },
   };
@@ -158,12 +158,12 @@
   function rollCollectibleType() {
     // weights: common berries common, mega rare
     const table = [
-      ["RAZZ", 0],
-      ["PINAP", 0],
-      ["GOLD_RAZZ", 0],
-      ["NANAB", 0],
-      ["SILVER_PINAP", 0],
-      ["MEGA_STONE", 100],
+      ["RAZZ", 23],
+      ["PINAP", 42],
+      ["GOLD_RAZZ", 9],
+      ["NANAB", 10],
+      ["SILVER_PINAP", 12],
+      ["MEGA_STONE", 4],
     ];
     const total = table.reduce((s, [, w]) => s + w, 0);
     let r = Math.random() * total;
