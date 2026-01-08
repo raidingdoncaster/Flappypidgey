@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="720" viewBox="0 0 420 720">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6fd4ff"/>
+      <stop offset="0.6" stop-color="#bdefff"/>
+      <stop offset="1" stop-color="#eaf9ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="420" height="720" fill="url(#sky)"/>
+  <g opacity="0.8" fill="#fff">
+    <ellipse cx="90" cy="120" rx="55" ry="26"/>
+    <ellipse cx="130" cy="110" rx="70" ry="34"/>
+    <ellipse cx="170" cy="122" rx="55" ry="26"/>
+    <ellipse cx="250" cy="200" rx="52" ry="24"/>
+    <ellipse cx="285" cy="190" rx="68" ry="32"/>
+    <ellipse cx="320" cy="202" rx="52" ry="24"/>
+  </g>
+</svg>
