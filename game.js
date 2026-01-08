@@ -33,7 +33,7 @@
   assets.pipe.onload = onAssetLoad;
 
   assets.bg.src = "assets/bg.svg";
-  assets.pidgey.src = "assets/pidgey.svg";
+  assets.pidgey.src = "assets/pidgey_sheet.png";
   assets.pipe.src = "assets/pipe.svg";
 
   // --- Tuning ---
@@ -55,6 +55,8 @@
     over: false,
     score: 0,
     best: Number(localStorage.getItem("fp_best") || 0),
+
+    anim: { frame: 0, time: 0, fps: 14, frames: 22 },
 
     bird: { x: 140, y: H * 0.45, vy: 0, r: 18, angle: 0 },
 
@@ -90,6 +92,9 @@
     if (!state.started) start();
     if (state.over) return;
     state.bird.vy = T.flap;
+    state.anim.time = 0;
+    state.anim.time = 18;
+    setTimeout(() => { state.anim.fps = 14; }, 200)
   }
 
   function endGame() {
@@ -120,6 +125,13 @@
 
   function update(dt) {
     if (!state.running) return;
+    // Sprite animation tick
+    state.anim.time += dt;
+    const frameDur = 1 / state.anim.fps;
+    while (state.anim.time >= frameDur) {
+      state.anim.time -= frameDur;
+      state.anim.time = (state.anim.frame + 1) % state.anim.frames;
+    }
 
     const b = state.bird;
 
@@ -239,8 +251,24 @@
     ctx.rotate(b.angle);
 
     if (assets.loaded) {
-      const size = 56;
-      ctx.drawImage(assets.pidgey, -size / 2, -size / 2, size, size);
+      // Sprite sheet frame draw
+      const a = state.anim;
+
+      // Each frame is the sheet width divided by frame count
+      const fw = assets.pidgey.width / a.frames;
+      const fh = assets.pidgey.height;
+
+      const sx = Math.floor(a.frame * fw);
+      const sy = 0;
+
+      // Draw size on canvas (tweak to taste)
+      const size = 64;
+
+      ctx.drawImage(
+        assets.pidgey,
+        sx, sy, fw, fh,
+        -size / 2, -size / 2, size, size
+      );
     } else {
       // fallback circle bird
       ctx.fillStyle = "rgba(245,210,130,.98)";
