@@ -79,25 +79,25 @@
     maxFall: 980,
 
     pipeW: 80,
-    gap: 185,
-    gapHard: 155,
+    gap: 200,
+    gapHard: 160,
     spawnEvery: 1.25,
 
-    pipeSpeedBase: 220,
+    pipeSpeedBase: 200,
     pipeSpeedStep: 16, // every 5 points
 
     groundH: 90,
 
     frames: 22,
     fpsBase: 14,
-    fpsFlapBurst: 18,
+    fpsFlapBurst: 22,
 
-    birdSize: 90,
+    birdSize: 100,
     birdRadius: 26,
 
     collectibleChancePerPipe: 0.28,
 
-    invincibleSec: 4,
+    invincibleSec: 5,
     megaSec: 30,
   };
 
@@ -138,7 +138,7 @@
     NANAB: {
       key: "NANAB",
       title: "Nanab Berry",
-      desc: "Invincible for 4 seconds (Pidgey turns transparent + timer).",
+      desc: "Invincible for 5 seconds (Pidgey turns transparent + timer).",
       icon: "nanab",
       score: 0,
       clearPipes: 0,
@@ -149,7 +149,7 @@
       title: "Mega Stone",
       desc: "IT’S MEGA TIME! 30 seconds of Mega mode: 4× bigger and smash through pipes (timer above).",
       icon: "mega",
-      score: 0,
+      score: 20,
       clearPipes: 0,
       megaSec: T.megaSec,
     },
@@ -158,12 +158,12 @@
   function rollCollectibleType() {
     // weights: common berries common, mega rare
     const table = [
-      ["RAZZ", 42],
-      ["PINAP", 30],
-      ["GOLD_RAZZ", 12],
-      ["NANAB", 10],
-      ["SILVER_PINAP", 5],
-      ["MEGA_STONE", 1],
+      ["RAZZ", 0],
+      ["PINAP", 0],
+      ["GOLD_RAZZ", 0],
+      ["NANAB", 0],
+      ["SILVER_PINAP", 0],
+      ["MEGA_STONE", 100],
     ];
     const total = table.reduce((s, [, w]) => s + w, 0);
     let r = Math.random() * total;
