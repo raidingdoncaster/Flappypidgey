@@ -302,7 +302,7 @@
 
   function beginPlay() {
     state.mode = "play";
-    state.bird.vy = 0;
+    state.bird.vy = -120;
     state.spawnTimer = 0;
   }
 
@@ -522,10 +522,15 @@
       state.hudSlideT = t;
 
       const b = state.bird;
-      b.vy += (T.gravity * 0.45) * dt;
-      b.vy = clamp(b.vy, -900, 700);
-      b.y += b.vy * dt;
-      b.angle = clamp(b.vy / 900, -0.7, 0.8);
+
+      // HOLD bird in place during the transition so it can't fall
+      const hoverY = H * 0.45;
+      b.y += (hoverY - b.y) * Math.min(1, dt * 7);
+      b.vy = 0;
+      b.angle += (0 - b.angle) * Math.min(1, dt * 10);
+
+      // tiny bob so it still feels alive
+      b.y += Math.sin(nowMs() / 140) * 0.35;
 
       state.flutterT += dt;
       if (state.flutterT >= T.flutterEverySec) {
@@ -540,10 +545,15 @@
     // Countdown: no pipes, HUD visible
     if (state.mode === "countdown") {
       const b = state.bird;
-      b.vy += (T.gravity * 0.28) * dt;
-      b.vy = clamp(b.vy, -600, 460);
-      b.y += b.vy * dt;
-      b.angle = clamp(b.vy / 900, -0.55, 0.55);
+
+      // HOLD bird in place during countdown so player isn't dead before starting
+      const hoverY = H * 0.45;
+      b.y += (hoverY - b.y) * Math.min(1, dt * 7);
+      b.vy = 0;
+      b.angle += (0 - b.angle) * Math.min(1, dt * 10);
+
+      // tiny bob
+      b.y += Math.sin(nowMs() / 140) * 0.35;
 
       state.countdownT += dt;
       const stepDur = state.countdownStep === "go" ? T.countdownGoSec : T.countdownStepSec;
@@ -695,11 +705,11 @@
   function drawButton(x, y, w, h, label, enabled, onClick) {
     state.buttons.push({ x, y, w, h, enabled, onClick });
 
-    const bg = enabled ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)";
-    const st = enabled ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.12)";
+    const bg = enabled ? "rgba(64, 178, 255, 0.75)" : "rgba(64, 178, 255, 0.25)";
+    const st = enabled ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.25)";
     drawCard(x, y, w, h, 14, bg, st);
 
-    ctx.fillStyle = enabled ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.45)";
+    ctx.fillStyle = enabled ? "rgba(5, 25, 45, 0.95)" : "rgba(5, 25, 45, 0.45)";
     ctx.font = "900 16px system-ui, -apple-system, Segoe UI, Roboto, Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -1045,17 +1055,14 @@
     ctx.textBaseline = "middle";
     ctx.fillText(`High Score: ${state.best.toLocaleString()}`, W / 2, 166);
 
-    // Card behind bird
-    drawCard(126, 260, 168, 120, 16, "rgba(255,255,255,0.18)", "rgba(255,255,255,0.16)");
-
     // Buttons
     drawButton(126, 400, 78, 48, "PLAY", true, () => beginTransition());
     drawButton(216, 400, 78, 48, "HELP", true, () => { state.mode = "help"; });
 
-    drawButton(126, 456, 168, 44, "Story Mode (Later)", false, null);
-    drawButton(48,  620, 110, 44, "Leaderboards (Later)", false, null);
-    drawButton(160, 620, 110, 44, "Capsule Shop (Later)", false, null);
-    drawButton(272, 620, 110, 44, "PokÃ©dex (Later)", false, null);
+    drawButton(126, 456, 168, 44, "Story (Later)", false, null);
+    drawButton(48,  620, 110, 44, "Boards (Later)", false, null);
+    drawButton(160, 620, 110, 44, "Shop (Later)", false, null);
+    drawButton(272, 620, 110, 44, "Dex (Later)", false, null);
 
     // Difficulty toggle button (in-canvas)
     const hardLabel = state.hard ? "Hard: ON" : "Hard: OFF";
@@ -1146,7 +1153,9 @@
       drawCollectibles();
     }
 
-    drawBird();
+    if (state.mode !== "menu" && state.mode !== "help") {
+      drawBird();
+    }
     drawParticles();
     drawGround();
 
@@ -1156,8 +1165,14 @@
     }
 
     // Menu/help overlays
-    if (state.mode === "menu") drawMenuOverlay();
-    if (state.mode === "help") drawHelpOverlay();
+    if (state.mode === "menu") {
+      drawMenuOverlay();
+      drawBird(); // draw bird AFTER menu so it sits on top of the character card
+    }
+    if (state.mode === "help") {
+      drawHelpOverlay();
+    drawBird(); // keeps the bird visible on help too (optional but nice)
+    }
 
     drawMegaBanner();
     drawCountdown();
